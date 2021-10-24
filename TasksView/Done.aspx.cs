@@ -21,6 +21,7 @@ namespace SkillsShowcase.Tasks
                 }
             }
             rptDoneTasks.DataSource = new Data.Tasks().GetTasksByUser(Context.User.Identity.GetUserName(), true);
+            rptDoneTasks.DataBind(); 
 
         }
 

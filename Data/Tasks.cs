@@ -27,7 +27,7 @@ namespace SkillsShowcase.Data
 
             using (SqlConnection Connection = new SqlConnection(connectionstring))
             {
-                SqlCommand cmd = new SqlCommand("SELECT * FROM Task WHERE Username = @Username", Connection);
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Task WHERE Username = @Username ORDER BY DateStarted DESC", Connection);
                 cmd.Parameters.AddWithValue("@Username", user);
                 Connection.Open();
                 lst = MapTasks(cmd.ExecuteReader());
@@ -44,7 +44,7 @@ namespace SkillsShowcase.Data
 
             using (SqlConnection Connection = new SqlConnection(connectionstring))
             {
-                SqlCommand cmd = new SqlCommand("SELECT * FROM Task WHERE Username = @Username AND IsDone = @IsDone", Connection);
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Task WHERE Username = @Username AND IsDone = @IsDone ORDER BY DateStarted DESC", Connection);
                 cmd.Parameters.AddWithValue("@Username", user);
                 cmd.Parameters.AddWithValue("@IsDone", done);
                 Connection.Open();
@@ -110,6 +110,30 @@ namespace SkillsShowcase.Data
                 lst.Add(obj);
             }
             return lst;
+        }
+
+        public List<Tasks> GetTasksForToDoView(string username)
+        {
+            List<Tasks> lst = new List<Tasks>();
+            lst = GetTasksByUser(username, false);
+            lst.AddRange(GetTasksByUser(username, true).Take(5));
+            return lst;
+        }
+
+        public void MarkDone()
+        {
+            var connectionstring = ConfigurationManager.ConnectionStrings["TasksConnection"].ToString();
+
+            using (SqlConnection Connection = new SqlConnection(connectionstring))
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE Task SET IsDone = 1, DateEnded = @DateEnded WHERE IdTask = @IdTask", Connection);
+                cmd.Parameters.AddWithValue("@IdTask", this.IdTask);
+                cmd.Parameters.AddWithValue("@DateEnded", this.DateFinished);
+                Connection.Open();
+                cmd.ExecuteNonQuery();
+                Connection.Close();
+
+            }
         }
     }
 
